@@ -1,7 +1,7 @@
 package api
 
 import (
-	"fmt"
+	"encoding/json"
 	"inabajunmr/dicc/dictionary"
 	"io/ioutil"
 	"log"
@@ -16,7 +16,7 @@ type Webster struct {
 
 const URL = "https://www.dictionaryapi.com/api/v3/references/collegiate/json/"
 
-func (w Webster) SearchWords(cond SearchCondition) ([]dictionary.Word, error) {
+func (w Webster) SearchWords(cond SearchCondition) (dictionary.Result, error) {
 
 	response, err := http.Get(assembleUrl(w.apiKey, cond))
 	if err != nil {
@@ -30,8 +30,22 @@ func (w Webster) SearchWords(cond SearchCondition) ([]dictionary.Word, error) {
 		log.Fatal(err)
 	}
 
-	fmt.Println(string(body))
-	return nil, nil
+	// API Response of webster has not perfect matching word so need to parse word(when searching "test", return "test-flight"
+	var websterResult []WebsterResult
+	if err := json.Unmarshal(body, &websterResult); err != nil {
+		log.Fatal(err)
+	}
+
+	var defs []dictionary.Definition
+	for _, r := range websterResult {
+		word := dictionary.Definition{r.Shortdefs, r.Fl}
+		defs = append(defs, word)
+	}
+
+	return dictionary.Result{
+		SearchWord:  cond.Word,
+		Definitions: defs,
+	}, nil
 }
 
 func assembleUrl(apiKey string, cond SearchCondition) string {
@@ -44,4 +58,9 @@ func assembleUrl(apiKey string, cond SearchCondition) string {
 	q.Set("key", apiKey)
 	u.RawQuery = q.Encode()
 	return u.String()
+}
+
+type WebsterResult struct {
+	Fl        string   `json:"fl"`
+	Shortdefs []string `json:"shortdef"`
 }

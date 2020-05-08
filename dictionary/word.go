@@ -1,9 +1,13 @@
 package dictionary
 
-type Word struct {
-	definitions []Definition
+type FunctionalLavel int
+
+type Result struct {
+	SearchWord  string
+	Definitions []Definition
 }
 
 type Definition struct {
-	description string
+	Descriptions    []string
+	FunctionalLabel string
 }

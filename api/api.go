@@ -12,7 +12,7 @@ const (
 )
 
 type DictionaryApi interface {
-	SearchWords(SearchCondition) ([]dictionary.Word, error)
+	SearchWords(SearchCondition) (dictionary.Result, error)
 }
 
 type SearchCondition struct {

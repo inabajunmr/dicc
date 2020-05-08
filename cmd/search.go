@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"inabajunmr/dicc/api"
 
 	"github.com/spf13/cobra"
@@ -30,9 +31,20 @@ var searchCmd = &cobra.Command{
 			// TODO
 		}
 
+		// TODO using cache
+
 		dictionaryApi := api.GetApi(api.WEBSTER)
 		condition := api.SearchCondition{args[0]}
-		dictionaryApi.SearchWords(condition)
+		result, _ := dictionaryApi.SearchWords(condition)
+		for _, def := range result.Definitions {
+			fmt.Println("------")
+			fmt.Printf("fl:%v\n", def.FunctionalLabel)
+			for i, desc := range def.Descriptions {
+				fmt.Printf("%v. %v\n", i, desc)
+			}
+		}
+
+		// TODO save as history
 	},
 }
 
